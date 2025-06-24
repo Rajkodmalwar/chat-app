@@ -1,0 +1,39 @@
+<h2>Welcome, {{ username }}!</h2>
+<form id="chat-form">
+    <input type="text" id="message" placeholder="Enter message">
+    <button type="submit">Send</button>
+</form>
+<div id="response-area"></div>
+<h3>Chat History</h3>
+<div id="history"></div>
+
+<script>
+    document.getElementById("chat-form").onsubmit = function(e) {
+        e.preventDefault();
+        const msg = document.getElementById("message").value;
+        fetch('/command', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("response-area").innerText = "Bot: " + data.response;
+            loadHistory();
+        });
+    };
+
+    function loadHistory() {
+        fetch('/chat_history')
+            .then(res => res.json())
+            .then(data => {
+                const history = document.getElementById("history");
+                history.innerHTML = "";
+                data.forEach(entry => {
+                    history.innerHTML += `<p><b>You:</b> ${entry.message}<br/><b>Bot:</b> ${entry.response}</p><hr/>`;
+                });
+            });
+    }
+
+    loadHistory();
+</script>
